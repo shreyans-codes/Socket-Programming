@@ -11,7 +11,6 @@ public class MultiClient implements Runnable {
     private Socket client;
     private BufferedReader in;
     private PrintWriter out;
-    private String nickname;
     private Boolean done;
 
     public MultiClient(String ip_address, int port) {

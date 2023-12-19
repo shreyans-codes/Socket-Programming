@@ -8,16 +8,13 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * ConnectionHandler
- */
-
 public class MultiServer implements Runnable {
 
     private ArrayList<ConnectionHandler> connections;
     private boolean done;
     private ServerSocket server;
     private int port;
+    private ArrayList<String> userNames;
 
     private ExecutorService pool;
 
@@ -25,6 +22,7 @@ public class MultiServer implements Runnable {
         this.connections = new ArrayList<>();
         this.done = false;
         this.port = port;
+        this.userNames = new ArrayList<>();
     }
 
     public void broadcast(String message) {
@@ -42,6 +40,7 @@ public class MultiServer implements Runnable {
             pool = Executors.newCachedThreadPool();
             while (!done) {
                 Socket client = server.accept();
+                updateUserNames();
                 ConnectionHandler handler = new ConnectionHandler(client);
                 connections.add(handler);
                 pool.execute(handler);
@@ -49,6 +48,26 @@ public class MultiServer implements Runnable {
         } catch (Exception e) {
             shutdown();
         }
+    }
+
+    public void updateUserNames() {
+        for (ConnectionHandler ch : connections) {
+            if (!userNames.contains(ch.nickname)) {
+                userNames.add(ch.nickname);
+            }
+        }
+    }
+
+    public void addUserName(String newName) {
+        userNames.add(newName);
+    }
+
+    public void removeUserName(String nameToRemove) {
+        userNames.remove(nameToRemove);
+    }
+
+    public boolean isUserNamePresent(String nameToFind) {
+        return userNames.contains(nameToFind);
     }
 
     public void shutdown() {
@@ -85,8 +104,18 @@ public class MultiServer implements Runnable {
             try {
                 out = new PrintWriter(client.getOutputStream(), true);
                 in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                out.println("Please enter a nickname: ");
-                nickname = in.readLine();
+                boolean temp = true;
+                while (temp) {
+                    out.println("Please enter a nickname: ");
+                    nickname = in.readLine();
+                    if (isUserNamePresent(nickname)) {
+                        out.println("Nickname already exists!");
+                        continue;
+                    }
+                    addUserName(nickname);
+                    temp = false;
+                    break;
+                }
                 System.out.println(nickname + " connected!");
                 broadcast(nickname + " has entered the chat");
                 String clientMessage;
@@ -111,6 +140,7 @@ public class MultiServer implements Runnable {
 
         public void shutdown() {
             out.close();
+            removeUserName(nickname);
             try {
                 in.close();
                 if (!client.isClosed()) {

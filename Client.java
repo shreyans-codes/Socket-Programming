@@ -49,6 +49,7 @@ public class Client {
                 if (messageToSend.equalsIgnoreCase("bye"))
                     break;
             }
+            scanner.close();
         } catch (IOException e) {
             System.out.println("Connection Closed!\nExiting");
             return;
@@ -64,6 +65,7 @@ public class Client {
                     bufferedReader.close();
                 if (bufferedWriter != null)
                     bufferedWriter.close();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

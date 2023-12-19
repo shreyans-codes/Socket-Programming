@@ -42,6 +42,7 @@ public class Server {
 
                 }
                 socket.close();
+                scanner.close();
                 inputStreamReader.close();
                 outputStreamWriter.close();
                 bufferedReader.close();
