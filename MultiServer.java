@@ -70,6 +70,17 @@ public class MultiServer implements Runnable {
         return userNames.contains(nameToFind);
     }
 
+    public void sendCustomMessage(String senderName, String recieverName, String message) {
+        for (ConnectionHandler ch : connections) {
+            System.out.println("Current: " + ch.nickname.length());
+            if (ch.nickname.equals(recieverName)) {
+                System.out.println("Gupchup" + ch.nickname);
+                ch.sendMessage(senderName + ": (To you) " + message);
+                break;
+            }
+        }
+    }
+
     public void shutdown() {
         this.done = true;
         for (ConnectionHandler ch : connections) {
@@ -121,7 +132,10 @@ public class MultiServer implements Runnable {
                 String clientMessage;
                 while ((clientMessage = in.readLine()) != null) {
                     if (clientMessage.startsWith("/nick")) {
-                        // Todo: handle custom message sending
+                        String messages[] = clientMessage.split(" ");
+                        String recieverName = messages[1];
+                        String privateMessage = messages[2];
+                        sendCustomMessage(nickname, recieverName, privateMessage);
                     } else if (clientMessage.startsWith("/quit")) {
                         broadcast(nickname + " has left the chat");
                         shutdown();
