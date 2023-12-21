@@ -12,7 +12,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -23,6 +25,7 @@ public class MultiServer implements Runnable {
     private boolean done;
     private ServerSocket server;
     private int port;
+    private String passKey = "shreyans-chatmigo";
 
     private ExecutorService pool;
 
@@ -95,6 +98,7 @@ public class MultiServer implements Runnable {
         private BufferedReader in;
         private PrintWriter out;
         private String nickname;
+        private String customPrivateKey;
 
         public ConnectionHandler(Socket client) {
             this.client = client;
@@ -106,6 +110,13 @@ public class MultiServer implements Runnable {
                 out = new PrintWriter(client.getOutputStream(), true);
                 in = new BufferedReader(new InputStreamReader(client.getInputStream()));
                 boolean temp = true;
+                Random rand = new Random();
+                Integer rn = rand.nextInt(10000);
+                customPrivateKey = passKey + rn.toString();
+                String keyShareMessage = new String(Base64.getEncoder().encode(("/rn " + rn.toString()).getBytes()),
+                        "UTF-8");
+                sendMessage(keyShareMessage);
+                System.out.println(new String(Base64.getDecoder().decode(keyShareMessage)));
                 while (temp) {
                     out.println("Please enter a nickname: ");
                     nickname = in.readLine();
