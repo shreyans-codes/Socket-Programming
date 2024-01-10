@@ -14,8 +14,6 @@ public class MultiClient implements Runnable {
     private PrintWriter out;
     private Boolean done;
 
-    private String passKey = "shreyans-chatmigo";
-
     public MultiClient(String ip_address, int port) {
         this.ip_address = ip_address;
         this.port = port;
@@ -29,17 +27,18 @@ public class MultiClient implements Runnable {
             out = new PrintWriter(client.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(client.getInputStream()));
             String inMessage = in.readLine();
-            String rnMessage = new String(Base64.getDecoder().decode(inMessage), "UTF-8");
-            String splitMessage[] = rnMessage.split(" ");
-            if (splitMessage[0].equals("/rn")) {
-                passKey = passKey + splitMessage[1];
-            }
+            System.out.println(inMessage);
+            // String rnMessage = new String(Base64.getDecoder().decode(inMessage),
+            // "UTF-8");
+            // String splitMessage[] = rnMessage.split(" ");
+            // if (splitMessage[0].equals("/rn")) {
+            // passKey = passKey + splitMessage[1];
+            // }
             InputHandler inputHandler = new InputHandler();
             Thread t = new Thread(inputHandler);
             t.start();
             while ((inMessage = in.readLine()) != null) {
                 System.out.println(inMessage);
-                System.out.println(passKey);
             }
         } catch (Exception e) {
             shutdown();
